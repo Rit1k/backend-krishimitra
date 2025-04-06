@@ -1,6 +1,5 @@
 # Use official Python image with build tools
-FROM python:3.11-slim
-
+FROM python:3.10-slim
 # Set environment vars
 ENV PYTHONDONTWRITEBYTECODE=1
 ENV PYTHONUNBUFFERED=1
