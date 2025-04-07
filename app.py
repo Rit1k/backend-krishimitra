@@ -258,24 +258,31 @@ if not (platform.system() == 'Windows' and 'tf' in locals() and TF_AVAILABLE):
         TF_AVAILABLE = False
         model = None
 
-import os
 
 @app.route('/upload-model', methods=['POST'])
 def upload_model():
+    global model
+
     if 'model' not in request.files:
         return 'No model file provided', 400
-    
-    model_file = request.files['model']
-    os.makedirs('model', exist_ok=True)  # ✅ Create directory if not exists
-    model_path = os.path.join('model', 'plant_disease_model.h5')
-    if os.path.exists(model_path):
-        model = load_model(model_path)
-    else:
-        print("TensorFlow model not available.")
-        model_file.save(model_path)
-        
-    return 'Model uploaded successfully', 200
 
+    model_file = request.files['model']
+    os.makedirs('model', exist_ok=True)  # Ensure directory exists
+    model_path = os.path.join('model', 'plant_disease_model.h5')
+
+    try:
+        model_file.save(model_path)
+        print(f"✅ Model saved to {model_path}")
+
+        # Load the model immediately after saving
+        model = load_model(model_path)
+        print("✅ Model loaded successfully")
+
+        return 'Model uploaded and loaded successfully', 200
+
+    except Exception as e:
+        print(f"❌ Error during upload: {e}")
+        return f'Error uploading model: {e}', 500
 
 
 # Try to load the disease detection model
@@ -614,6 +621,7 @@ def analyze_image_colors(img):
 
 @app.route('/api/detect-disease', methods=['POST'])
 def detect_disease():
+    global model
     """Predict plant disease from uploaded image."""
     
     # Initialize variables
@@ -1964,3 +1972,11 @@ if __name__ == "__main__":
     if __name__ == "__main__":
         port = int(os.environ.get("PORT", 5000))  # default to 5000 locally
         app.run(host="0.0.0.0", port=port)
+
+    if __name__ == '__main__':
+        model_path = 'model/plant_disease_model.h5'
+        if os.path.exists(model_path):
+            model = load_model(model_path)
+            print("✅ Model pre-loaded on server start.")
+    
+    app.run(debug=False, host='0.0.0.0', port=5000)
