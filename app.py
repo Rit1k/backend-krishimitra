@@ -260,9 +260,19 @@ if not (platform.system() == 'Windows' and 'tf' in locals() and TF_AVAILABLE):
 
 @app.route('/upload-model', methods=['POST'])
 def upload_model():
-    file = request.files['model']
-    file.save('plant_detection_model.h5')
-    return 'Model uploaded successfully'
+    if 'model' not in request.files:
+        return jsonify({'error': 'No model file provided'}), 400
+    
+    model_file = request.files['model']
+    model_path = os.path.join("model", "plant_disease_model.h5")
+    model_file.save(model_path)
+
+    # Optionally reload it globally
+    global model
+    model = load_model(model_path)
+
+    return jsonify({'message': 'Model uploaded and loaded successfully'}), 200
+
 
 # Try to load the disease detection model
 if TF_AVAILABLE:
