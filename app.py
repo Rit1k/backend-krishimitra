@@ -258,7 +258,7 @@ if not (platform.system() == 'Windows' and 'tf' in locals() and TF_AVAILABLE):
         TF_AVAILABLE = False
         model = None
 
-from tensorflow.keras.models import load_model
+from keras.models import load_model
 
 @app.route('/upload-model', methods=['POST'])
 def upload_model():
