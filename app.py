@@ -268,8 +268,12 @@ def upload_model():
     model_file = request.files['model']
     os.makedirs('model', exist_ok=True)  # ✅ Create directory if not exists
     model_path = os.path.join('model', 'plant_disease_model.h5')
-    
-    model_file.save(model_path)
+    if os.path.exists(model_path):
+        model = load_model(model_path)
+    else:
+        print("TensorFlow model not available.")
+        model_file.save(model_path)
+        
     return 'Model uploaded successfully', 200
 
 
