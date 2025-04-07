@@ -258,28 +258,20 @@ if not (platform.system() == 'Windows' and 'tf' in locals() and TF_AVAILABLE):
         TF_AVAILABLE = False
         model = None
 
-from keras.models import load_model
+import os
 
 @app.route('/upload-model', methods=['POST'])
 def upload_model():
     if 'model' not in request.files:
-        return jsonify({'error': 'No model file provided'}), 400
+        return 'No model file provided', 400
     
     model_file = request.files['model']
-
-    # Ensure 'model' directory exists
-    model_dir = "model"
-    os.makedirs(model_dir, exist_ok=True)
-
-    model_path = os.path.join(model_dir, "plant_disease_model.h5")
+    os.makedirs('model', exist_ok=True)  # ✅ Create directory if not exists
+    model_path = os.path.join('model', 'plant_disease_model.h5')
+    
     model_file.save(model_path)
+    return 'Model uploaded successfully', 200
 
-    # Optionally load the model for use
-    global model
-    model = load_model(model_path)
-
-    print("✅ Model uploaded and loaded successfully.")
-    return jsonify({'message': 'Model uploaded and loaded successfully'}), 200
 
 
 # Try to load the disease detection model
