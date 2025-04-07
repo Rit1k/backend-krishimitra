@@ -1,5 +1,6 @@
 # Force TensorFlow to use CPU only
 from tensorflow.keras.models import load_model
+from huggingface_hub import hf_hub_download
 import os
 os.environ['CUDA_VISIBLE_DEVICES'] = '-1'
 os.environ['TF_CPP_MIN_LOG_LEVEL'] = '2'  # Reduce TensorFlow logging
@@ -33,7 +34,6 @@ import random
 
 # Import our model utilities for plant disease detection
 import model_utils
-
 
 
 
@@ -259,15 +259,25 @@ if not (platform.system() == 'Windows' and 'tf' in locals() and TF_AVAILABLE):
         TF_AVAILABLE = False
         model = None
 
-model = None
-model_path = 'model/plant_disease_model.h5'
+model_dir = "model"
+model_filename = "plant_disease_model.h5"
+model_path = os.path.join(model_dir, model_filename)
 
-# Load model during startup if it exists
-if os.path.exists(model_path):
-    model = load_model(model_path)
-    print("✅ Model loaded successfully at startup.")
-else:
-    print("⚠️ Model file not found at startup. Using fallback.")
+os.makedirs(model_dir, exist_ok=True)
+
+# Download if not already cached
+if not os.path.exists(model_path):
+    print("⏬ Downloading model from Hugging Face Hub...")
+    model_path = hf_hub_download(
+        repo_id="Rit1k/plant-disease-model",  # ✅ replace with your exact model repo ID
+        filename=model_filename,
+        cache_dir=model_dir,
+        local_dir=model_dir,
+        force_filename=model_filename
+    )
+
+model = load_model(model_path)
+print("✅ Model loaded from:", model_path)
 
 # Try to load the disease detection model
 if TF_AVAILABLE:
