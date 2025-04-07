@@ -18,5 +18,5 @@ RUN pip install -r requirements.txt
 EXPOSE 5000
 
 # Bind to dynamic port from Render
-CMD ["gunicorn", "--bind", "0.0.0.0:$PORT", "app:app"]
-
+# CMD ["gunicorn", "--bind", "0.0.0.0:$PORT", "app:app"]
+CMD ["python", "app.py"]
