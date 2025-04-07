@@ -1,4 +1,5 @@
 # Force TensorFlow to use CPU only
+from tensorflow.keras.models import load_model
 import os
 os.environ['CUDA_VISIBLE_DEVICES'] = '-1'
 os.environ['TF_CPP_MIN_LOG_LEVEL'] = '2'  # Reduce TensorFlow logging
@@ -258,37 +259,20 @@ if not (platform.system() == 'Windows' and 'tf' in locals() and TF_AVAILABLE):
         TF_AVAILABLE = False
         model = None
 
+model = None
+model_path = 'model/plant_disease_model.h5'
 
-@app.route('/upload-model', methods=['POST'])
-def upload_model():
-    global model
-
-    if 'model' not in request.files:
-        return 'No model file provided', 400
-
-    model_file = request.files['model']
-    os.makedirs('model', exist_ok=True)  # Ensure directory exists
-    model_path = os.path.join('model', 'plant_disease_model.h5')
-
-    try:
-        model_file.save(model_path)
-        print(f"✅ Model saved to {model_path}")
-
-        # Load the model immediately after saving
-        model = load_model(model_path)
-        print("✅ Model loaded successfully")
-
-        return 'Model uploaded and loaded successfully', 200
-
-    except Exception as e:
-        print(f"❌ Error during upload: {e}")
-        return f'Error uploading model: {e}', 500
-
+# Load model during startup if it exists
+if os.path.exists(model_path):
+    model = load_model(model_path)
+    print("✅ Model loaded successfully at startup.")
+else:
+    print("⚠️ Model file not found at startup. Using fallback.")
 
 # Try to load the disease detection model
 if TF_AVAILABLE:
     try:
-        model_path = os.path.join(os.path.dirname(os.path.abspath(__file__)), 'plant_disease_model.h5')
+        model_path = os.path.join(os.path.dirname(os.path.abspath(__file__)), 'model/plant_disease_model.h5')
         if os.path.exists(model_path):
             logger.info(f"Loading plant disease model from: {model_path}")
             try:
@@ -1756,8 +1740,8 @@ def test_tensorflow():
                 'input_shape': str(tf_model.input_shape),
                 'output_shape': str(tf_model.output_shape),
                 'output_classes': tf_model.output_shape[1] if hasattr(tf_model, 'output_shape') else None,
-                'model_path': os.path.join(os.path.dirname(os.path.abspath(__file__)), 'plant_disease_model.h5'),
-                'model_exists': os.path.exists(os.path.join(os.path.dirname(os.path.abspath(__file__)), 'plant_disease_model.h5')),
+                'model_path': os.path.join(os.path.dirname(os.path.abspath(__file__)), 'model/plant_disease_model.h5'),
+                'model_exists': os.path.exists(os.path.join(os.path.dirname(os.path.abspath(__file__)), 'model/plant_disease_model.h5')),
                 'disease_classes_count': len(DISEASE_CLASSES)
             }
             
