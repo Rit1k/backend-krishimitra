@@ -634,6 +634,11 @@ def detect_disease():
         # Open and validate image
         try:
             img = Image.open(file.stream)
+            img = image.resize((224, 224))
+            img_array = np.expand_dims(np.array(img) / 255.0, axis=0)
+            prediction = model.predict(img_array)
+            class_idx = np.argmax(prediction)
+            return jsonify({'prediction': int(class_idx)})
             logger.info(f"Original image format: {img.format}, size: {img.size}, mode: {img.mode}")
             
             # Convert to RGB if not already
