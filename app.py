@@ -39,8 +39,7 @@ import model_utils
 # Initialize Flask application
 app = Flask(__name__, static_folder='static')
 CORS(app, resources={r"/api/*": {"origins": os.getenv('CORS_ORIGINS', '*').split(',')}})
-port = int(os.environ.get("PORT", 5000))  # default to 5000 locally
-app.run(host="0.0.0.0", port=port)
+
 # Configure Flask app for better API handling
 app.url_map.strict_slashes = False
 app.config['JSON_SORT_KEYS'] = False
@@ -1948,4 +1947,6 @@ if __name__ == "__main__":
     logger.info("Starting KrishiMitra backend server")
     
     # Run the app
-    app.run(host='0.0.0.0', debug=True) 
+    if __name__ == "__main__":
+        port = int(os.environ.get("PORT", 5000))  # default to 5000 locally
+        app.run(host="0.0.0.0", port=port)
